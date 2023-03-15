@@ -1,7 +1,7 @@
 # knapsack-viz
 
 Team members:
-Abhinav Bandari, Samudra Mowar, Ethan Wong, Yeon Joon Jung
+Abhinav Bandari, Ethan Wong, Samudra Mowar, Yeon Joon Jung
 
 Deployed to: [https://abx393.github.io/knapsack-viz](https://abx393.github.io/knapsack-viz)
 
