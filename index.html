@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backpacker's Dilemma</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css"/>
+    <link rel="stylesheet" href="prism.css"/>
+    <script src="utils.js"></script>
+    <script src="knapsack.js"></script>
+    <script src="main.js"></script>
+    <script src="prism.js"></script>
+    <script src="recursion.js"></script>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<div class="title_background">
+    <h1 class="title">Backpacker's Dilemma: The Bounded Knapsack Problem</h1>
+    <p class="white">Abhinav Bandari, Ethan Wong, Samudra Mowar, Yeon Joon Jung</p>
+</div>
+
+<main>
+    <p>
+        Imagine that you and your friends are planning a hiking trip in the wilderness for a few days. As you prepare for the trip,
+        you realize that you'll need to bring all the essentials like food, water, camping gear, and clothing, but your backpack
+        has a limited weight capacity. So you decide to assign a value based on the importance of that item relative to the other items
+        for example water has a higher value than extra clothing. But each item has a different weight alongside their importance
+        value. So now you start to wonder, how can you optimize your backpack's contents to carry the most valuable items while staying
+        within the weight limit? You soon discover that this is a classic problem called the <em>knapsack problem</em>!
+    </p>
+    <p>
+        The bounded knapsack problem is to fit as many valuable items into a limited space as possible while
+        maximizing the sum total value of the items. In your case, the limited space
+        is the weight capacity of your backpack, and the valuable items are the things you need to survive in the wilderness. As you begin to plan and pack
+        for your trip, you realize that some items have a higher value to you, such as food and water, while others are less valuable, like
+        an extra pair of shoes. But some of the less valuable items may still be necessary for the trip. So, you need to figure out how to
+        balance the weight and value of each item to make the most of your backpack's limited capacity. This is where the knapsack problem
+        gets tricky, as you need to consider both the weight and value of each item to decide what to pack. You might have to make some tough
+        choices about what to include and what to omit.
+    </p>
+    <p>
+        Let's try to solve this problem with the following weights and values. Recall that the task is to select items from the given set, where each item has a weight and a value,
+        such that the total weight of the selected items is within a specified limit and the total value is maximized. Select a combination of items by clicking them to put them in the backpack.
+        Click the items again in the backpack if you want to remove items from it. <br> <br>
+        <em>Hint: the highest possible total value within the weight capacity is 34. See if you can get this value!</em>
+    </p>
+
+    <h1 class="sub-heading">Backpacker's Playground</h1>
+
+    <div id="knapsack_text"></div>
+
+    <div class="playground">
+        <div class="knapsackContainer">
+            <img class="backpack" src="static/images/blueschoolbag.png">
+            <div id="knapsack">
+                <div></div>
+                <div id="inside"></div>
+            </div>
+        </div>
+
+        <div id="outside">
+            <div id="outside0" class="notSelected">
+                <div class="allItems" id="item0" onclick="putInside(this, true)"></div>
+                <div class="allItems" id="item1" onclick="putInside(this, true)"></div>
+                <div class="allItems" id="item2" onclick="putInside(this, true)"></div>
+                <div class="allItems" id="item3" onclick="putInside(this, true)"></div>
+                <div class="allItems" id="item4" onclick="putInside(this, true)"></div>
+            </div>
+            <div id="outside1" class="notSelected">
+                <div class="allItems" id="item5" onclick="putInside(this, true)"></div>
+                <div class="allItems" id="item6" onclick="putInside(this, true)"></div>
+                <div class="allItems" id="item7" onclick="putInside(this, true)"></div>
+                <div class="allItems" id="item8" onclick="putInside(this, true)"></div>
+                <div class="allItems" id="item9" onclick="putInside(this, true)"></div>
+            </div>
+        </div>
+    </div>
+    <p>
+        <em>Let's break this problem down, starting from the naive approach and then considering more advanced techniques!</em>
+    </p>
+
+    <h1 class="sub-heading">Brute Force Approach</h1>
+    <div class="recursion">
+        <p>
+            Naively solving the knapsack problem involves trying out all possible combinations of items that fit
+            within the weight limit of the backpack and then selecting the one with the highest value. However, the <em>brute force</em> approach
+            becomes impractical for large input sizes since the number of possible combinations grows
+            exponentially. For small input sizes though, brute force can be a viable option. We can simply enumerate all possible combinations of items and their
+            corresponding weights and values, checking each to see if it fits within the weight
+            limit of the backpack and calculating its total value. Among the valid combinations, we can select the one with the highest total
+            value.
+        </p>
+        <p>
+            We can enumerate the possible combinations recursively. Given items \(1\ldots n\) and weight capacity \(W\), we consider two cases for item \(n\): either it's included in
+            the backpack or it's not included. In the animation below the left path is when it is not included and the right path is when it is included. 
+        </p>
+        <ul>
+            <li>If the item is included, we increase our value by \(\texttt{value}(n)\). Then, we recursively solve the subproblem with items \(1\ldots n-1\) <br>
+                with weight capacity \(W - \texttt{weight}(n)\). </li>
+            <li>If the item is not included, we recursively solve the subproblem with items \(1\ldots n-1\) with weight capacity still at \(W\).
+        </ul>
+        <p>
+            The best solution for the original problem with items
+            \(1 \ldots n\) is just the one that yields the higher value among the two subproblems. We continue
+            this process until there are no more items to consider, where the only total value possible is 0.
+        </p>
+        <p>
+            The animation below demonstrates this algorithm. Note that with 10 items, the tree extends much further than what is shown.
+            The lowest level for the tree would be when \(n=0\) meaning all items have been considered for that pathway.
+        </p>
+        <div id="canvas-div">
+            <canvas id="recursion-canvas"></canvas>
+        </div>
+    </div>
+
+    <p>
+        Notice in the third level of the tree, we have two distinct nodes that represent the same subproblem of \(n=8, W = 7\).
+        The subtrees rooted at each of these nodes are identical. Despite having solved the same subproblem before, the algorithm will recurse until it reaches the leaves of the tree,
+        which is unnecessary. To improve the efficiency of the recursive approach, we can <em>memoize</em> the results of subproblems we computed by storing them in a table. Before solving any subproblem,
+        we check the table and if the result is already there, we simply retrieve it from the table instead of recalculating it. This technique is known as
+        <em>dynamic programming</em>.
+    </p>
+
+    <!--
+    <h1 class="sub-heading">Small Input Size: Top Down Approach</h1>
+    <p>
+        The top-down approach is a recursive approach to solving the knapsack bounded case problem. It involves breaking down the problem
+        into smaller subproblems and solving them recursively, starting with the base case and working our way up to larger subproblems.
+        To apply this approach to the hiker's problem, we define a recursive function that considers the two cases for each item, either
+        the item is included in the backpack or not, and recursively calls itself with the remaining items and updated weight capacity.
+        We store the results of each subproblem in a table to avoid recalculating them multiple times and return the maximum value that
+        can be obtained for the weight capacity of the backpack. Overall, the top-down approach provides a systematic way of breaking down
+        the problem into smaller subproblems and solving them recursively, which can be a useful technique for solving optimization problems.
+    </p>
+    -->
+
+    <h1 class="sub-heading">Bottom-Up Approach with Animation</h1>
+    <div class="dp">
+        <p>
+            The <em>bottom-up</em> approach is simply another way to implement dynamic programming. In this approach, we solve the smallest subproblems first
+            before solving larger subproblems. For any subproblem we are currently solving, we are guaranteed that all smaller subproblems have been solved before.
+            We create a table with the columns representing weight capacities \(0\ldots W\) and the rows representing the \(n\) items. The value in the \(i\)th row and \(j\)th column represents the maximum
+            total value possible choosing from items \(1\ldots i\) such that the items chosen don't exceed weight limit \(j\).
+        </p>
+        <p>
+            We first fill the row \(i=0\), where there are no items to consider. We gradually fill in the remaining cells of the table in increasing order of \(i\) and increasing order of \(j\).
+            For each cell, we consider the same two cases and select the one that yields higher value:
+        <p>
+        <ul>
+            <li>
+                We add \(\texttt{value}(i)\) and solve the sub-problem with items \(1\ldots i-1\) and weight limit \(j-\texttt{weight}(i)\).
+            </li>
+            <li>
+                We solve the sub-problem with items \(1\ldots i-1\) and weight limit \(j\).
+            </li>
+        </ul>
+        </p>
+        <p>
+            The animation below will demonstrate this algorithm. The table is filled row by row. At each cell, the algorithm checks
+            if the current item \(i\) can be included within the weight limit \(j\).
+            If it can be included, the algorithm checks whether including it would yield a higher value than the best value for items \(1\ldots i-1\) and same weight limit
+            \(j\). If so, we choose the former. If the current item cannot be included within the weight limit, then the
+            algorithm simply copies the best value for items \(1\ldots i-1\) and same capacity \(j\). Once the table is filled, the
+            maximum value that can be obtained while staying within the weight limit is found in the bottom-right cell of the table. The items that were selected
+            to obtain this value can be traced back from the table by examining the cells that contributed to the final value. <br> <br>
+            <em>Press Play to watch the animation or press Step to watch the algorithm fill one cell in the table at a time.</em>
+        </p>
+    </div>
+
+    <div class="controls marginLeft">
+
+        <button class="controlButton" id="start">
+            Play
+        </button>
+
+        <button class="controlButton" id="pause">
+            Pause
+        </button>
+
+        <button class="controlButton" id="step">
+            Step
+        </button>
+
+        <button class="controlButton" id="reset">
+            Reset
+        </button>
+
+        <div class="slidecontainer">
+            Play Speed: <span id="demo"></span>
+            <input type="range" min="1" max="10" value="5" class="slider" id="myRange">
+        </div>
+
+    </div>
+
+    <br>
+    <div class="tableAndKnapsack">
+        <div>
+            <table id="tableId" class="table marginLeft">
+                <tr>
+                    <th class="cell" colspan="3"></th>
+                    <th class="cell" colspan="11">Weight Capacity \(j\)</th>
+                </tr>
+                <tr>
+                    <th class="cell">Item Index \(i\)</th>
+                    <th class="cell">\(\texttt{weight}(i)\)</th>
+                    <th class="cell">\(\texttt{value}(i)\)</th>
+                    <th class="cell">0</th>
+                    <th class="cell">1</th>
+                    <th class="cell">2</th>
+                    <th class="cell">3</th>
+                    <th class="cell">4</th>
+                    <th class="cell">5</th>
+                    <th class="cell">6</th>
+                    <th class="cell">7</th>
+                    <th class="cell">8</th>
+                    <th class="cell">9</th>
+                    <th class="cell">10</th>
+                </tr>
+                <tr>
+                    <th class="cell">-</th>
+                    <th class="cell" id="w0"></th>
+                    <th class="cell" id="v0"></th>
+                    <td id="0,0" class="cell">0</td>
+                    <td id="0,1" class="cell">0</td>
+                    <td id="0,2" class="cell">0</td>
+                    <td id="0,3" class="cell">0</td>
+                    <td id="0,4" class="cell">0</td>
+                    <td id="0,5" class="cell">0</td>
+                    <td id="0,6" class="cell">0</td>
+                    <td id="0,7" class="cell">0</td>
+                    <td id="0,8" class="cell">0</td>
+                    <td id="0,9" class="cell">0</td>
+                    <td id="0,10" class="cell">0</td>
+                </tr>
+                <tr>
+                    <th class="cell">1</th>
+                    <th class="cell" id="w1"></th>
+                    <th class="cell" id="v1"></th>
+                    <td id="1,0" class="cell">0</td>
+                    <td id="1,1" class="cell">0</td>
+                    <td id="1,2" class="cell">0</td>
+                    <td id="1,3" class="cell">0</td>
+                    <td id="1,4" class="cell">0</td>
+                    <td id="1,5" class="cell">0</td>
+                    <td id="1,6" class="cell">0</td>
+                    <td id="1,7" class="cell">0</td>
+                    <td id="1,8" class="cell">0</td>
+                    <td id="1,9" class="cell">0</td>
+                    <td id="1,10" class="cell">0</td>
+                </tr>
+                <tr>
+                    <th class="cell">2</th>
+                    <th class="cell" id="w2"></th>
+                    <th class="cell" id="v2"></th>
+                    <td id="2,0" class="cell">0</td>
+                    <td id="2,1" class="cell">0</td>
+                    <td id="2,2" class="cell">0</td>
+                    <td id="2,3" class="cell">0</td>
+                    <td id="2,4" class="cell">0</td>
+                    <td id="2,5" class="cell">0</td>
+                    <td id="2,6" class="cell">0</td>
+                    <td id="2,7" class="cell">0</td>
+                    <td id="2,8" class="cell">0</td>
+                    <td id="2,9" class="cell">0</td>
+                    <td id="2,10" class="cell">0</td>
+                </tr>
+                <tr>
+                    <th class="cell">3</th>
+                    <th class="cell" id="w3"></th>
+                    <th class="cell" id="v3"></th>
+                    <td id="3,0" class="cell">0</td>
+                    <td id="3,1" class="cell">0</td>
+                    <td id="3,2" class="cell">0</td>
+                    <td id="3,3" class="cell">0</td>
+                    <td id="3,4" class="cell">0</td>
+                    <td id="3,5" class="cell">0</td>
+                    <td id="3,6" class="cell">0</td>
+                    <td id="3,7" class="cell">0</td>
+                    <td id="3,8" class="cell">0</td>
+                    <td id="3,9" class="cell">0</td>
+                    <td id="3,10" class="cell">0</td>
+                </tr>
+                <tr>
+                    <th class="cell">4</th>
+                    <th class="cell" id="w4"></th>
+                    <th class="cell" id="v4"></th>
+                    <td id="4,0" class="cell">0</td>
+                    <td id="4,1" class="cell">0</td>
+                    <td id="4,2" class="cell">0</td>
+                    <td id="4,3" class="cell">0</td>
+                    <td id="4,4" class="cell">0</td>
+                    <td id="4,5" class="cell">0</td>
+                    <td id="4,6" class="cell">0</td>
+                    <td id="4,7" class="cell">0</td>
+                    <td id="4,8" class="cell">0</td>
+                    <td id="4,9" class="cell">0</td>
+                    <td id="4,10" class="cell">0</td>
+                </tr>
+                <tr>
+                    <th class="cell">5</th>
+                    <th class="cell" id="w5"></th>
+                    <th class="cell" id="v5"></th>
+                    <td id="5,0" class="cell">0</td>
+                    <td id="5,1" class="cell">0</td>
+                    <td id="5,2" class="cell">0</td>
+                    <td id="5,3" class="cell">0</td>
+                    <td id="5,4" class="cell">0</td>
+                    <td id="5,5" class="cell">0</td>
+                    <td id="5,6" class="cell">0</td>
+                    <td id="5,7" class="cell">0</td>
+                    <td id="5,8" class="cell">0</td>
+                    <td id="5,9" class="cell">0</td>
+                    <td id="5,10" class="cell">0</td>
+                </tr>
+                <tr>
+                    <th class="cell">6</th>
+                    <th class="cell" id="w6"></th>
+                    <th class="cell" id="v6"></th>
+                    <td id="6,0" class="cell">0</td>
+                    <td id="6,1" class="cell">0</td>
+                    <td id="6,2" class="cell">0</td>
+                    <td id="6,3" class="cell">0</td>
+                    <td id="6,4" class="cell">0</td>
+                    <td id="6,5" class="cell">0</td>
+                    <td id="6,6" class="cell">0</td>
+                    <td id="6,7" class="cell">0</td>
+                    <td id="6,8" class="cell">0</td>
+                    <td id="6,9" class="cell">0</td>
+                    <td id="6,10" class="cell">0</td>
+                </tr>
+                <tr>
+                    <th class="cell">7</th>
+                    <th class="cell" id="w7"></th>
+                    <th class="cell" id="v7"></th>
+                    <td id="7,0" class="cell">0</td>
+                    <td id="7,1" class="cell">0</td>
+                    <td id="7,2" class="cell">0</td>
+                    <td id="7,3" class="cell">0</td>
+                    <td id="7,4" class="cell">0</td>
+                    <td id="7,5" class="cell">0</td>
+                    <td id="7,6" class="cell">0</td>
+                    <td id="7,7" class="cell">0</td>
+                    <td id="7,8" class="cell">0</td>
+                    <td id="7,9" class="cell">0</td>
+                    <td id="7,10" class="cell">0</td>
+                </tr>
+                <tr>
+                    <th class="cell">8</th>
+                    <th class="cell" id="w8"></th>
+                    <th class="cell" id="v8"></th>
+                    <td id="8,0" class="cell">0</td>
+                    <td id="8,1" class="cell">0</td>
+                    <td id="8,2" class="cell">0</td>
+                    <td id="8,3" class="cell">0</td>
+                    <td id="8,4" class="cell">0</td>
+                    <td id="8,5" class="cell">0</td>
+                    <td id="8,6" class="cell">0</td>
+                    <td id="8,7" class="cell">0</td>
+                    <td id="8,8" class="cell">0</td>
+                    <td id="8,9" class="cell">0</td>
+                    <td id="8,10" class="cell">0</td>
+                </tr>
+                <tr>
+                    <th class="cell">9</th>
+                    <th class="cell" id="w9"></th>
+                    <th class="cell" id="v9"></th>
+                    <td id="9,0" class="cell">0</td>
+                    <td id="9,1" class="cell">0</td>
+                    <td id="9,2" class="cell">0</td>
+                    <td id="9,3" class="cell">0</td>
+                    <td id="9,4" class="cell">0</td>
+                    <td id="9,5" class="cell">0</td>
+                    <td id="9,6" class="cell">0</td>
+                    <td id="9,7" class="cell">0</td>
+                    <td id="9,8" class="cell">0</td>
+                    <td id="9,9" class="cell">0</td>
+                    <td id="9,10" class="cell">0</td>
+                </tr>
+                <tr>
+                    <th class="cell">10</th>
+                    <th class="cell" id="w10"></th>
+                    <th class="cell" id="v10"></th>
+                    <td id="10,0" class="cell">0</td>
+                    <td id="10,1" class="cell">0</td>
+                    <td id="10,2" class="cell">0</td>
+                    <td id="10,3" class="cell">0</td>
+                    <td id="10,4" class="cell">0</td>
+                    <td id="10,5" class="cell">0</td>
+                    <td id="10,6" class="cell">0</td>
+                    <td id="10,7" class="cell">0</td>
+                    <td id="10,8" class="cell">0</td>
+                    <td id="10,9" class="cell">0</td>
+                    <td id="10,10" class="cell">0</td>
+                </tr>
+            </table>
+        </div>
+
+        <div id="aknapsack_text"></div>
+
+
+        <div class="knapsackContainer">
+            <img class="backpack" src="static/images/blueschoolbag.png">
+            <div id="aknapsack">
+                <div></div>
+                <div id="ainside"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="aoutside">
+        <div class="allAItems" id="aitem0"></div>
+        <div class="allAItems" id="aitem1"></div>
+        <div class="allAItems" id="aitem2"></div>
+        <div class="allAItems" id="aitem3"></div>
+        <div class="allAItems" id="aitem4"></div>
+        <div class="allAItems" id="aitem5"></div>
+        <div class="allAItems" id="aitem6"></div>
+        <div class="allAItems" id="aitem7"></div>
+        <div class="allAItems" id="aitem8"></div>
+        <div class="allAItems" id="aitem9"></div>
+    </div>
+    </div>
+
+    <h1 class="sub-heading">Algorithm Code</h1>
+    <p>
+        Now we will explain the code for solving the knapsack problem using the bottom up dynamic programming approach.
+        We will refer to the code block below.
+    </p>
+
+    <div id=code-snippet-container>
+        <div id=code-snippet-options>
+            <button id="jsButton" onclick="selectJs()">JavaScript</button>
+            <button id="javaButton" onclick="selectJava()">Java</button>
+            <button id="pythonButton" onclick="selectPython()">Python</button>
+        </div>
+
+        <pre id="jsCode"><code class="language-js" data-prismjs-copy="Copy the code snippet!">
+    function knapsack(weights, vals, weightLimit) {
+
+        // Calculate the number of items
+        let numItems = weights.length;
+
+        // Creating 2d array (weightLimit + 1) x (numItems + 1)
+        let table = new Array(numItems + 1);
+
+        // Initialize the table with 0 values
+        for (let i = 0; i <= numItems; i++) {
+            table[i] = new Array(weightLimit + 1).fill(0);
+        }
+
+        // Solving sub-problems in a bottom-up approach manner
+        for (let i = 1; i <= numItems; i++) {
+            for ( let j = 0 j <= weightLimit; j++) {
+                // If the current item cannot be included, use the previous item’s value
+                if (weights[i - 1] > j) {
+                    table[i][j] = table [i - 1][j];
+                } else {
+                    // Choose the maximum value between including or excluding the current item
+                    table[i][j] = Math.max(table[i - 1][j], table[i - 1][j - weights[i - 1]] + vals[i - 1]);
+                }
+            }
+        }
+
+        // Displaying the output table
+        return table;
+    }
+            </code></pre>
+
+        <pre id="javaCode"><code class="language-java" data-prismjs-copy="Copy the code snippet!">
+    public int[][] knapsack(int[] weights, int[] vals, int weightLimit) {
+
+        // Calculate the number of items
+        int numItems = weights.length;
+
+        // Create a 2d array (weightLimit + 1) x (numItems + 1)
+        int[][] table = new int[numItems + 1][weightLimit + 1];
+
+        // Solving sub-problems in a bottom-up approach manner
+        for (int i = 1; i <= numItems; i++) {
+            for (int j = 0; j <= weightLimit; j++) {
+                if (weights[i - 1] > j) {
+                    table[i][j] = table[i-1][j];
+                } else {
+                    table[i][j] = Math.max(table[i - 1][j], table[i - 1][j - weights[i - 1]] + vals[i - 1]);
+                }
+            }
+        }
+
+        // Displaying the output table
+        return table;
+    }
+
+            </code></pre>
+
+        <pre id="pythonCode"><code class="language-py" data-prismjs-copy="Copy the code snippet!">
+    # add "import math"
+
+    def  knapsack(self, weights,  vals,  weightLimit) :
+
+        # Calculate the number of items
+        numItems = len(weights)
+
+        # Create a 2d array (weightLimit + 1) x (numItems + 1)
+        table = [[0] * (weightLimit + 1) for _ in range(numItems + 1)]
+
+        # Solving sub-problems in a bottom-up approach manner
+        i = 1
+        while (i <= numItems) :
+            j = 0
+            while (j <= weightLimit) :
+                if (weights[i - 1] > j) :
+                    table[i][j] = table[i - 1][j]
+                else :
+                    table[i][j] = max(table[i - 1][j],table[i - 1][j - weights[i - 1]] + vals[i - 1])
+                j += 1
+            i += 1
+        return table
+            </code></pre>
+    </div>
+
+
+
+    <p>
+        The function \(\texttt{knapsack}\) takes three inputs: a \(\texttt{weights}\) array, a \(\texttt{vals}\) array,
+        and a \(\texttt{weightLimit}\). The function first creates a 2D array with dimensions \(\texttt{numItems+1} \times \texttt{weightLimit+1}\)
+        and initializes all values to 0.
+    </p>
+    <p>
+        Then, the function uses a nested loop to fill in the \(\texttt{table}\). The outer loop iterates through
+        each item in the \(\texttt{weights}\) and \(\texttt{vals}\) arrays, while the inner loop iterates through each possible weight up to the
+        weightLimit. For each cell in the table, the function considers two cases: either the item is not included in
+        the backpack, or it is included in the backpack. If the weight of the item is greater than the current weight
+        limit, the function copies the value from the cell above it in the table. If the weight of the item is less than
+        or equal to the current weight limit, the function compares the value of including the item with the value of not
+        including the item and selects the maximum.
+    </p>
+    <p>
+        Finally, the function returns the completed table, which contains the maximum value that can be obtained for each
+        weight and item combination. The function does not select the actual items to include in the backpack, but it provides
+        the necessary information to do so.
+    </p>
+
+    <p style="margin-bottom: 78px">
+        If you are interested in learning more about dynamic programming, look into related concepts of memoization, top-down vs bottom-up approach, state space reduction, approximation algorithms and
+        related problems of longest common subsequence (LCS) problem, matrix chain multiplication, edit distance, Bellman-Ford algorithm, Floyd-Warshall algorithm, coin change problem, 0/1 knapsack problem.
+    </p>
+</main>
+
+<footer>
+    <p>
+        <c class="white-text">Related links</c>
+        <br>
+        <br>
+        <a href="https://gitlab.cs.washington.edu/cse442/wi23/fp/algoviz">Repository</a>
+        <br>
+        <a href="https://courses.cs.washington.edu/courses/cse442/23wi/fp.html">CSE 442 Data Visualization</a>
+        <br>
+        <a href="https://www.washington.edu">University of Washington</a>
+    </p>
+
+
+</footer>
+
+</body>
+</html>
